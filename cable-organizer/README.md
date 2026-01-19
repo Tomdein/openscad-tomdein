@@ -19,3 +19,14 @@ I downloaded a [nice models](https://www.printables.com/model/1111926-cable-orga
    - Back wall
    - Full wall
    - Webbing
+
+## Defaults
+ - `height`: `8mm`
+ - `wall_thickness`: `1.2mm`
+ - `default_entry_percentage`: `0.8` (80% of cable dia is cut out)
+ - `center`: `true`
+ - `mirror_x`: `false`
+ - `uniform_width`: `true`
+ - `flat_back`: `true`
+ - `flat_front`: `true`
+ - `union`: `true` (nice for second cable organizer with mirror_x = true)
