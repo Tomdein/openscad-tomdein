@@ -26,7 +26,10 @@ settings_flat_back = true;
 settings_flat_front = true;
 
 // settings_translation = [0, 0, 0]; // A vec3 or a list of vec3 for every cable holder
-// A additional translation if you want to use the default +- wall_thickness/2 in Y direction and add additional translation on top of that
+// To offset last N cable holders out as you would 'glue' them to the side do the following:
+// for dia = [4.5,4.5,4.5,4.5,4.5,2,2,2,2] where we want the last 4 2mm cables to be offset:
+// set the x translation to the [(2+2+2+2) + (spacer1, spacer2, spacer3) + wall_thickness]/2 - using any spacers if you used them
+// that is: (N*dia + sum_of_N-1_spacers + wall_thickness)/2
 settings_additional_translation = [undef, [0, 0, 0]]; // A vec3 or a list of vec3 for every cable holder
 settings_union = true;
 // ==================================================== Advanced features =====================================================
