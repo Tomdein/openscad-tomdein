@@ -192,13 +192,20 @@ for(i=[0:num_cables-1]){
 
 
 cum_width = [for(i=0, cum_w=0; i <= num_cables; i=i+1, cum_w=cum_w + (cables_dia[i-1] == undef ? 0 : cables_dia[i-1]) + (cable_spacing_values[i-1] == undef ? 0 : cable_spacing_values[i-1]) + wall_thickness) cum_w];
+max_length = max_dia + 2*wall_thickness;
+
+// Precalculate values so I can search forward and backward when chamfering
+len_overrides = [for(i=[0:num_cables-1]) is_undef(length_override) || is_num(length_override) ? length_override : length_override[i]];
+for(i=[0:num_cables-1]){assert(is_undef(len_override) || is_num(len_override), "length_override entries must be undef or numbers for each cable");}
+lengths = [for(i=[0:num_cables-1])
+    max(is_undef(len_overrides[i]) || len_overrides[i] <= 0 ? (uniform_width == true ? max_length : 0) : len_overrides[i], cables_dia[i] + 2*wall_thickness)
+];
+spacer_widths = [for(i=[0:num_cables-2]) cable_spacing_values[i] == undef ? 0 : cable_spacing_values[i]];
+spacer_lengths = [for(i=[0:num_cables-2]) cable_spacing_length_values[i] == "w" ? lengths[i] : cable_spacing_length_values[i] == "b" ? wall_thickness : cable_spacing_length_values[i]];
 
 mirror([0,mirror_x == true ? 1 : 0, 0]){
 translate([center == true ? -width/2 : 0, 0, 0]){
 for(i=[0:num_cables-1]){
-    len_override = is_undef(length_override) || is_num(length_override) ? length_override : length_override[i];
-    assert(is_undef(len_override) || is_num(len_override), "length_override entries must be undef or numbers for each cable");
-
     cable_entry_perc_override = is_undef(cable_entry_percentage_override) ? undef : is_num(cable_entry_percentage_override) ? cable_entry_percentage_override <= 0 ? undef : cable_entry_percentage_override : cable_entry_percentage_override[i];
     assert(is_undef(cable_entry_perc_override) || is_num(cable_entry_perc_override), "cable_entry_percentage_override entries must be undef or numbers for each cable");
 
@@ -207,15 +214,11 @@ for(i=[0:num_cables-1]){
     opening_width = is_undef(cable_entry_perc_override) ? cable_entry_percentage * dia : cable_entry_perc_override * dia;
 
     center_y = dia/2 + wall_thickness;
-    max_length = max_dia + 2*wall_thickness;
-    length = max(is_undef(len_override) || len_override <= 0 ? (uniform_width == true ? max_length : 0) : len_override, dia + 2*wall_thickness);
+    length = lengths[i];
 
-    prev_dia = (i == 0) ? 0 : cables_dia[i-1];
-    next_dia = (i == num_cables-1) ? 0 : cables_dia[i+1];
-
-    spacer_width = cable_spacing_values[i] == undef ? 0 : cable_spacing_values[i];
-    spacer_length = cable_spacing_length_values[i] == "w" ? length : cable_spacing_length_values[i] == "b" ? wall_thickness : cable_spacing_length_values[i];
-    spacer_length_prev = i == 0 ? 0 : cable_spacing_length_values[i-1] == "w" ? length : cable_spacing_length_values[i-1] == "b" ? wall_thickness : cable_spacing_length_values[i-1];
+    spacer_width = spacer_widths[i];
+    spacer_length = spacer_lengths[i];
+    spacer_length_prev = i == 0 ? 0 : spacer_lengths[i-1];
 
     union(){
         difference(){
@@ -321,16 +324,21 @@ for(i=[0:num_cables-1]){
                 difference(){
                     cube([spacer_width + wall_thickness, spacer_length, height], center=false);
                     // Front Chamfer
-                    translate([0, spacer_length - wall_thickness, -height]){
-                        rotate([0, 0, 45]){
-                            cube([chamfer_cube_width, chamfer_cube_width, height*3], center=false);
-                        }
-                    };
-                    translate([spacer_width + wall_thickness, spacer_length - wall_thickness, -height]){
-                        rotate([0, 0, 45]){
-                            cube([chamfer_cube_width, chamfer_cube_width, height*3], center=false);
-                        }
-                    };
+                    if(spacer_length > lengths[i]){
+                        translate([0, spacer_length - wall_thickness, -height]){
+                            rotate([0, 0, 45]){
+                                cube([chamfer_cube_width, chamfer_cube_width, height*3], center=false);
+                            }
+                        };
+                    }
+                    if(spacer_length > lengths[i+1]){
+                        translate([spacer_width + wall_thickness, spacer_length - wall_thickness, -height]){
+                            rotate([0, 0, 45]){
+                                cube([chamfer_cube_width, chamfer_cube_width, height*3], center=false);
+                            }
+                        };
+                    }
+                }
                 }
             }
         }
