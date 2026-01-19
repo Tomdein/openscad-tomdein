@@ -214,7 +214,7 @@ spacer_widths = [for(i=[0:num_cables-2]) cable_spacing_values[i] == undef ? 0 : 
 spacer_lengths = [for(i=[0:num_cables-2]) cable_spacing_length_values[i] == "c" ? 0 : cable_spacing_length_values[i] == "w" ? lengths[i] : cable_spacing_length_values[i] == "b" ? wall_thickness : cable_spacing_length_values[i]];
 
 mirror([0,mirror_x == true ? 1 : 0, 0]){
-translate([center == true ? -width/2 : 0, 0, 0]){
+translate([center == true ? - cum_width[num_cables]/2 - wall_thickness/2 : 0, 0, 0]){
 for(i=[0:num_cables-1]){
     cable_entry_perc_override = is_undef(cable_entry_percentage_override) ? undef : is_num(cable_entry_percentage_override) ? cable_entry_percentage_override <= 0 ? undef : cable_entry_percentage_override : cable_entry_percentage_override[i];
     assert(is_undef(cable_entry_perc_override) || is_num(cable_entry_perc_override), "cable_entry_percentage_override entries must be undef or numbers for each cable");
