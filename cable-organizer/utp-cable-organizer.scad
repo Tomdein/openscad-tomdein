@@ -201,7 +201,7 @@ for(i=[0:num_cables-1]){
         }
 
         // Cut opening
-        translate([cum_width[i] + width_half, dia/2 + wall_thickness + max_length/2, 0]){cube([opening_width, max_length, height*3], center=true);}
+        translate([cum_width[i] + width_half, dia/2 + wall_thickness + length/2, 0]){cube([opening_width, length, height*3], center=true);}
 
         // Cut Front Chamfer
         for(j=[-1:1]){
@@ -219,7 +219,7 @@ for(i=[0:num_cables-1]){
 
         // Cut Top/Bottom Chamfer
         for(j=[0, 1]){
-            translate([cum_width[i] + width_half, dia/2 + wall_thickness + max_length/2, j*height])
+            translate([cum_width[i] + width_half, dia/2 + wall_thickness + length/2, j*height])
             {
                 rotate(a=45, v=[0, 1, 0])
                 {
