@@ -15,7 +15,7 @@ function is_undef_or_numlist(v, i = 0) = is_list(v) && (i < len(v) ? (is_num(v[i
 // If you set some parameters as lists and leave some entries as undef those will be replaced by the default values.
 //
 // ======================================================= Fill this in =======================================================
-settings_cables_dia = [[5,5,5,5],[2,5]]; // or just a single list: cables_dia = [5,4,4,5];
+settings_cables_dia = [[5.5,5.5,5.5,5.5],[4.5,4.5,4.5,4.5,4.5,1.5,1.5,1.5,1.5]]; // or just a single list: cables_dia = [5,4,4,5];
 settings_height = 8;
 settings_wall_thickness = 1.2;
 settings_cable_entry_percentage = 0.80;
@@ -30,7 +30,7 @@ settings_flat_front = true;
 // for dia = [4.5,4.5,4.5,4.5,4.5,2,2,2,2] where we want the last 4 2mm cables to be offset:
 // set the x translation to the [(2+2+2+2) + (spacer1, spacer2, spacer3) + wall_thickness]/2 - using any spacers if you used them
 // that is: (N*dia + sum_of_N-1_spacers + wall_thickness)/2
-settings_additional_translation = [undef, [0, 0, 0]]; // A vec3 or a list of vec3 for every cable holder
+settings_additional_translation = [undef, [(4*1.5 + 3*(2+settings_wall_thickness) + settings_wall_thickness)/2, 0, 0]]; // A vec3 or a list of vec3 for every cable holder
 settings_union = true;
 // ==================================================== Advanced features =====================================================
 // If you want to set a custom length for every cable holder
@@ -58,9 +58,9 @@ settings_cable_entry_percentage_override = undef;
 // A 0 or negative number is treated as undef - no effect here
 // One wall_thickness is overlapped so you might want to add +wall_thickness
 // Example: settings_length_override = [undef, [0.50, undef]];
-settings_cable_spacing = 5;
+settings_cable_spacing = [undef, [undef,undef,undef,undef,undef,2,2,2]];
 // The same as above but in either a undef/0 or length in mm or 'w' as wall (fill all) or 'b' only back (fill just the back part) or 'c' that connects the middles of the cables
-settings_cable_spacing_length = "c";
+settings_cable_spacing_length = "w";
 // If undef uses wall_thickness.
 // Only used for "c" option above.
 // As usual can be a single value or a list or list of values for every cable holder.
