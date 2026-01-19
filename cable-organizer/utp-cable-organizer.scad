@@ -56,8 +56,13 @@ settings_cable_entry_percentage_override = undef;
 // One wall_thickness is overlapped so you might want to add +wall_thickness
 // Example: settings_length_override = [undef, [0.50, undef]];
 settings_cable_spacing = 5;
-// The same as above but in either a undef/0 or length in mm or 'w' as wall (fill all) or 'b' only back (fill just the back part)
-settings_cable_spacing_length = 7.9;
+// The same as above but in either a undef/0 or length in mm or 'w' as wall (fill all) or 'b' only back (fill just the back part) or 'c' that connects the middles of the cables
+settings_cable_spacing_length = "c";
+// If undef uses wall_thickness.
+// Only used for "c" option above.
+// As usual can be a single value or a list or list of values for every cable holder.
+// Best used with flat_back=false
+settings_webbing_wall_thickness = 1.5 * settings_wall_thickness;
 // ================================================== CABLE HOLDERS SETTINGS ==================================================
 
 // Every parameter is in mm
@@ -122,18 +127,23 @@ module cable_holder(){
 
         cable_spacing = is_undef(settings_cable_spacing) || is_num(settings_cable_spacing) ? settings_cable_spacing : settings_cable_spacing[i];
         cable_spacing_length = is_undef(settings_cable_spacing_length) || is_num(settings_cable_spacing_length) || is_string(settings_cable_spacing_length) ? settings_cable_spacing_length : settings_cable_spacing_length[i];
+        webbing_wall_thickness = is_undef(settings_webbing_wall_thickness) || is_num(settings_webbing_wall_thickness) ? settings_webbing_wall_thickness : settings_webbing_wall_thickness[i];
 
         if(union_flag == true) {
             union(){
                 translate(translation + additional_translation){
                     cable_holder_single(cables_dia=cables_dia, height=height, wall_thickness=wall_thickness, cable_entry_percentage=cable_entry_percentage, center=center, mirror_x=mirror_x,
-                     uniform_width=uniform_width, flat_back=flat_back, flat_front=flat_front, length_override=length_override, cable_entry_percentage_override=cable_entry_percentage_override, cable_spacing=cable_spacing, cable_spacing_length=cable_spacing_length);
+                     uniform_width=uniform_width, flat_back=flat_back, flat_front=flat_front,
+                     length_override=length_override, cable_entry_percentage_override=cable_entry_percentage_override,
+                     cable_spacing=cable_spacing, cable_spacing_length=cable_spacing_length, webbing_wall_thickness=webbing_wall_thickness);
                 }
             }
         } else {
             translate(translation + additional_translation){
                 cable_holder_single(cables_dia=cables_dia, height=height, wall_thickness=wall_thickness, cable_entry_percentage=cable_entry_percentage, center=center, mirror_x=mirror_x,
-                uniform_width=uniform_width, flat_back=flat_back, flat_front=flat_front, length_override=length_override, cable_entry_percentage_override=cable_entry_percentage_override, cable_spacing=cable_spacing, cable_spacing_length=cable_spacing_length);
+                uniform_width=uniform_width, flat_back=flat_back, flat_front=flat_front,
+                length_override=length_override, cable_entry_percentage_override=cable_entry_percentage_override,
+                cable_spacing=cable_spacing, cable_spacing_length=cable_spacing_length, webbing_wall_thickness=webbing_wall_thickness);
             }
         }
     }
@@ -145,7 +155,7 @@ module cable_holder_single(cables_dia=[6,7,7,6], height=8, wall_thickness=1.6, c
  // Advanced features:
  length_override = undef,
  cable_entry_percentage_override = undef,
- cable_spacing = undef, cable_spacing_length = undef){
+ cable_spacing = undef, cable_spacing_length = undef, webbing_wall_thickness = undef){
 
 num_cables = len(cables_dia);
 max_dia = max(cables_dia);
@@ -185,7 +195,7 @@ for(i=[0:num_cables-1]){
 
     if(i < num_cables - 1){
         assert(is_num(cable_spacing_values[i]), "cable_spacing entries must be numbers for each cable");
-        assert(is_num(cable_spacing_length_values[i]) || cable_spacing_length_values[i] == "w" || cable_spacing_length_values[i] == "b" , "cable_spacing entries must be undef or numbers or 'w' or 'b' for each cable");
+        assert(is_num(cable_spacing_length_values[i]) || cable_spacing_length_values[i] == "w" || cable_spacing_length_values[i] == "b" || cable_spacing_length_values[i] == "c", "cable_spacing entries must be undef or numbers or 'w' or 'b' or 'c' for each cable");
     }
 }
 
@@ -201,7 +211,7 @@ lengths = [for(i=[0:num_cables-1])
     max(is_undef(len_overrides[i]) || len_overrides[i] <= 0 ? (uniform_width == true ? max_length : 0) : len_overrides[i], cables_dia[i] + 2*wall_thickness)
 ];
 spacer_widths = [for(i=[0:num_cables-2]) cable_spacing_values[i] == undef ? 0 : cable_spacing_values[i]];
-spacer_lengths = [for(i=[0:num_cables-2]) cable_spacing_length_values[i] == "w" ? lengths[i] : cable_spacing_length_values[i] == "b" ? wall_thickness : cable_spacing_length_values[i]];
+spacer_lengths = [for(i=[0:num_cables-2]) cable_spacing_length_values[i] == "c" ? 0 : cable_spacing_length_values[i] == "w" ? lengths[i] : cable_spacing_length_values[i] == "b" ? wall_thickness : cable_spacing_length_values[i]];
 
 mirror([0,mirror_x == true ? 1 : 0, 0]){
 translate([center == true ? -width/2 : 0, 0, 0]){
@@ -219,6 +229,8 @@ for(i=[0:num_cables-1]){
     spacer_width = spacer_widths[i];
     spacer_length = spacer_lengths[i];
     spacer_length_prev = i == 0 ? 0 : spacer_lengths[i-1];
+
+    webbing_wall_thickness = is_undef(webbing_wall_thickness) || (is_num(webbing_wall_thickness) && webbing_wall_thickness <= 0) ? wall_thickness : is_num(webbing_wall_thickness) ? webbing_wall_thickness : webbing_wall_thickness[i];
 
     union(){
         difference(){
@@ -315,30 +327,60 @@ for(i=[0:num_cables-1]){
             }
         }
 
+        // Add Spacer between cables
+        if(i < num_cables - 1 && spacer_width > 0){
+            // "c" option - connect the middles of the cables - a webbing
+            if(cable_spacing_length_values[i] == "c"){
+                x_start = cum_width[i] + width_half*2 - wall_thickness;
+                y_start = dia/2 + wall_thickness;
+                x_end = cum_width[i+1] + wall_thickness;
+                y_end = cables_dia[i+1]/2 + wall_thickness;
+                // x_delta = x_end - x_start;
+                // y_delta = y_end - y_start;
 
-        // Spacer between cables
-        if(spacer_width > 0 && spacer_length > 0 && i < num_cables - 1){
-            chamfer_cube_width = sqrt(2 * pow(wall_thickness, 2));
+                wh = webbing_wall_thickness/2;
+                CubePoints = [
+                [ x_start,  y_start - wh,  0 ],  //0
+                [ x_start,  y_start + wh,  0 ],  //1
+                [ x_end,  y_end + wh,  0 ],  //2
+                [ x_end,  y_end - wh,  0 ],  //3
+                [ x_start,  y_start - wh,  height ],  //4
+                [ x_start,  y_start + wh,  height ],  //5
+                [ x_end,  y_end + wh,  height ],  //6
+                [ x_end,  y_end - wh,  height ]]; //7
 
-            translate([cum_width[i] + width_half*2 - wall_thickness, 0, 0]){
-                difference(){
-                    cube([spacer_width + wall_thickness, spacer_length, height], center=false);
-                    // Front Chamfer
-                    if(spacer_length > lengths[i]){
-                        translate([0, spacer_length - wall_thickness, -height]){
-                            rotate([0, 0, 45]){
-                                cube([chamfer_cube_width, chamfer_cube_width, height*3], center=false);
-                            }
-                        };
+                CubeFaces = [
+                [0,1,2,3],  // bottom
+                [4,5,1,0],  // front
+                [7,6,5,4],  // top
+                [5,6,2,1],  // right
+                [6,7,3,2],  // back
+                [7,4,0,3]]; // left
+
+                polyhedron( CubePoints, CubeFaces );
+            // Rest of the types handled separately
+            }else if(spacer_length > 0){
+                chamfer_cube_width = sqrt(2 * pow(wall_thickness, 2));
+
+                translate([cum_width[i] + width_half*2 - wall_thickness, 0, 0]){
+                    difference(){
+                        cube([spacer_width + wall_thickness, spacer_length, height], center=false);
+                        // Front Chamfer
+                        if(spacer_length > lengths[i]){
+                            translate([0, spacer_length - wall_thickness, -height]){
+                                rotate([0, 0, 45]){
+                                    cube([chamfer_cube_width, chamfer_cube_width, height*3], center=false);
+                                }
+                            };
+                        }
+                        if(spacer_length > lengths[i+1]){
+                            translate([spacer_width + wall_thickness, spacer_length - wall_thickness, -height]){
+                                rotate([0, 0, 45]){
+                                    cube([chamfer_cube_width, chamfer_cube_width, height*3], center=false);
+                                }
+                            };
+                        }
                     }
-                    if(spacer_length > lengths[i+1]){
-                        translate([spacer_width + wall_thickness, spacer_length - wall_thickness, -height]){
-                            rotate([0, 0, 45]){
-                                cube([chamfer_cube_width, chamfer_cube_width, height*3], center=false);
-                            }
-                        };
-                    }
-                }
                 }
             }
         }
