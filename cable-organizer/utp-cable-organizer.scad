@@ -2,6 +2,9 @@ $fn = $preview ? 16 : 64;
 
 function add(v, i = 0, r = 0) = i < len(v) ? add(v, i + 1, r + v[i]) : r;
 
+function is_numlist(v, i = 0) = is_list(v) && (i < len(v) ? (is_num(v[i]) ? is_numlist(v, i + 1) : false) : true);
+function is_undef_or_numlist(v, i = 0) = is_list(v) && (i < len(v) ? (is_num(v[i]) || is_undef(v[i]) ? is_undef_or_numlist(v, i + 1) : false) : true);
+
 // ================================================== CABLE HOLDERS SETTINGS ==================================================
 //
 // ======================================================== Read this =========================================================
@@ -26,6 +29,16 @@ settings_flat_front = true;
 // A additional translation if you want to use the default +- wall_thickness/2 in Y direction and add additional translation on top of that
 settings_additional_translation = [undef, [0, 0, 0]]; // A vec3 or a list of vec3 for every cable holder
 settings_union = true;
+// ==================================================== Advanced features =====================================================
+// If you want to set a custom length for every cable holder
+//  - a single value
+//  - a list of values for every cable holder
+//  - a list of lists for every cable in every cable holder
+// A 0 is treated as undef - default length will be used
+// Please, don't negative values
+// Normally the value is: [max_]dia + 2*wall_thickness. Lower values will break the model so they are capped to that minimum.
+// Example: settings_length_override = [10, [8, undef]];
+settings_length_override = undef;
 // ================================================== CABLE HOLDERS SETTINGS ==================================================
 
 // Every parameter is in mm
@@ -81,17 +94,22 @@ module cable_holder(){
 
         union_flag = is_list(settings_union) ? (settings_union[i] == undef ? default_union : settings_union[i]) : settings_union; assert(is_bool(union_flag), "union must be a boolean");
 
+        // Advanced features
+        length_override = is_undef(settings_length_override) || is_num(settings_length_override)? settings_length_override : settings_length_override[i];
+        assert(is_undef(length_override) || is_list(length_override) || is_num(length_override), "length_override must be undef/number, a list of undef/numbers or a list of lists of undef/numbers");
+        echo(length_override);
+
         if(union_flag == true) {
             union(){
                 translate(translation + additional_translation){
                     cable_holder_single(cables_dia=cables_dia, height=height, wall_thickness=wall_thickness, cable_entry_percentage=cable_entry_percentage, center=center, mirror_x=mirror_x,
-                     uniform_width=uniform_width, flat_back=flat_back, flat_front=flat_front);
+                     uniform_width=uniform_width, flat_back=flat_back, flat_front=flat_front, length_override=length_override);
                 }
             }
         } else {
             translate(translation + additional_translation){
                 cable_holder_single(cables_dia=cables_dia, height=height, wall_thickness=wall_thickness, cable_entry_percentage=cable_entry_percentage, center=center, mirror_x=mirror_x,
-                uniform_width=uniform_width, flat_back=flat_back, flat_front=flat_front);
+                uniform_width=uniform_width, flat_back=flat_back, flat_front=flat_front, length_override=length_override);
             }
         }
     }
@@ -99,7 +117,7 @@ module cable_holder(){
 
 // uniform_width - if you mix diameters the ends won't lign up properly -> use this to set the ends to width of the biggest dia
 module cable_holder_single(cables_dia=[6,7,7,6], height=8, wall_thickness=1.6, cable_entry_percentage=0.80, center=true, mirror_x=false,
- uniform_width=true, flat_back = true, flat_front = true){
+ uniform_width=true, flat_back = true, flat_front = true, length_override = undef){
 
 num_cables = len(cables_dia);
 max_dia = max(cables_dia);
@@ -110,12 +128,15 @@ cum_width = [for(i=0, cum_w=0; i <= num_cables; i=i+1, cum_w=cum_w + (cables_dia
 mirror([0,mirror_x == true ? 1 : 0, 0]){
 translate([center == true ? -width/2 : 0, 0, 0]){
 for(i=[0:num_cables-1]){
+    len_override = is_undef(length_override) || is_num(length_override) ? length_override : length_override[i];
+    assert(is_undef(len_override) || is_num(len_override), "length_override entries must be undef or numbers for each cable");
+
     dia = cables_dia[i];
     width_half = wall_thickness + dia/2;
     opening_width = cable_entry_percentage*dia;
     center_y = dia/2 + wall_thickness;
     max_length = max_dia + 2*wall_thickness;
-    length = (uniform_width == true ? max_length : dia + 2*wall_thickness);
+    length = max(is_undef(len_override) || len_override <= 0 ? (uniform_width == true ? max_length : 0) : len_override, dia + 2*wall_thickness);
 
     prev_dia = (i == 0) ? 0 : cables_dia[i-1];
     next_dia = (i == num_cables-1) ? 0 : cables_dia[i+1];
