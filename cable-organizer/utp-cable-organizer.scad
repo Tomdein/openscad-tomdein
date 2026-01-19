@@ -39,6 +39,14 @@ settings_union = true;
 // Normally the value is: [max_]dia + 2*wall_thickness. Lower values will break the model so they are capped to that minimum.
 // Example: settings_length_override = [10, [8, undef]];
 settings_length_override = undef;
+
+// If you want to set a custom cable_entry_percentage for every cable holder
+//  - a single value
+//  - a list of values for every cable holder
+//  - a list of lists for every cable in every cable holder
+// A 0 or negative number is treated as undef - default_cable_entry_percentage will be used
+// Example: settings_length_override = [undef, [0.50, undef]];
+settings_cable_entry_percentage_override = undef;
 // ================================================== CABLE HOLDERS SETTINGS ==================================================
 
 // Every parameter is in mm
@@ -97,19 +105,23 @@ module cable_holder(){
         // Advanced features
         length_override = is_undef(settings_length_override) || is_num(settings_length_override)? settings_length_override : settings_length_override[i];
         assert(is_undef(length_override) || is_list(length_override) || is_num(length_override), "length_override must be undef/number, a list of undef/numbers or a list of lists of undef/numbers");
-        echo(length_override);
+        echo("length_override: ", length_override);
+
+        cable_entry_percentage_override = is_undef(settings_cable_entry_percentage_override) || is_num(settings_cable_entry_percentage_override)? settings_cable_entry_percentage_override : settings_cable_entry_percentage_override[i];
+        assert(is_undef(cable_entry_percentage_override) || is_list(cable_entry_percentage_override) || is_num(cable_entry_percentage_override), "cable_entry_percentage_override must be undef/number, a list of undef/numbers or a list of lists of undef/numbers");
+        echo("cable_entry_percentage_override: ", cable_entry_percentage_override);
 
         if(union_flag == true) {
             union(){
                 translate(translation + additional_translation){
                     cable_holder_single(cables_dia=cables_dia, height=height, wall_thickness=wall_thickness, cable_entry_percentage=cable_entry_percentage, center=center, mirror_x=mirror_x,
-                     uniform_width=uniform_width, flat_back=flat_back, flat_front=flat_front, length_override=length_override);
+                     uniform_width=uniform_width, flat_back=flat_back, flat_front=flat_front, length_override=length_override, cable_entry_percentage_override=cable_entry_percentage_override);
                 }
             }
         } else {
             translate(translation + additional_translation){
                 cable_holder_single(cables_dia=cables_dia, height=height, wall_thickness=wall_thickness, cable_entry_percentage=cable_entry_percentage, center=center, mirror_x=mirror_x,
-                uniform_width=uniform_width, flat_back=flat_back, flat_front=flat_front, length_override=length_override);
+                uniform_width=uniform_width, flat_back=flat_back, flat_front=flat_front, length_override=length_override, cable_entry_percentage_override=cable_entry_percentage_override);
             }
         }
     }
@@ -117,7 +129,7 @@ module cable_holder(){
 
 // uniform_width - if you mix diameters the ends won't lign up properly -> use this to set the ends to width of the biggest dia
 module cable_holder_single(cables_dia=[6,7,7,6], height=8, wall_thickness=1.6, cable_entry_percentage=0.80, center=true, mirror_x=false,
- uniform_width=true, flat_back = true, flat_front = true, length_override = undef){
+ uniform_width=true, flat_back = true, flat_front = true, length_override = undef, cable_entry_percentage_override = undef){
 
 num_cables = len(cables_dia);
 max_dia = max(cables_dia);
@@ -131,9 +143,13 @@ for(i=[0:num_cables-1]){
     len_override = is_undef(length_override) || is_num(length_override) ? length_override : length_override[i];
     assert(is_undef(len_override) || is_num(len_override), "length_override entries must be undef or numbers for each cable");
 
+    cable_entry_perc_override = is_undef(cable_entry_percentage_override) ? undef : is_num(cable_entry_percentage_override) ? cable_entry_percentage_override <= 0 ? undef : cable_entry_percentage_override : cable_entry_percentage_override[i];
+    assert(is_undef(cable_entry_perc_override) || is_num(cable_entry_perc_override), "cable_entry_percentage_override entries must be undef or numbers for each cable");
+
     dia = cables_dia[i];
     width_half = wall_thickness + dia/2;
-    opening_width = cable_entry_percentage*dia;
+    opening_width = is_undef(cable_entry_perc_override) ? cable_entry_percentage * dia : cable_entry_perc_override * dia;
+
     center_y = dia/2 + wall_thickness;
     max_length = max_dia + 2*wall_thickness;
     length = max(is_undef(len_override) || len_override <= 0 ? (uniform_width == true ? max_length : 0) : len_override, dia + 2*wall_thickness);
