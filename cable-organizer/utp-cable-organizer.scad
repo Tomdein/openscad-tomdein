@@ -155,7 +155,7 @@ module cable_holder(
 
     // Create cable holders
     echo("Generating cable holders...");
-    assert(is_list(settings_cables_dia), "cables_dia must be a list of lists");
+    assert(is_list(settings_cables_dia) && min([for (holder_cables_dia = settings_cables_dia) is_list(holder_cables_dia) == true ? 1 : 0]), "cables_dia must be a list of lists");
     assert(is_undef(settings_translation) || is_list(settings_translation), "translation must be a vec3 or list of vec3");
     num_holders = len(settings_cables_dia);
 
