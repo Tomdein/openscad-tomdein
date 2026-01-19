@@ -130,7 +130,7 @@ module cable_holder(){
         mirror_x = is_undef(settings_mirror_x) ? default_mirror_x : is_list(settings_mirror_x) ? (settings_mirror_x[i] == undef ? default_mirror_x : settings_mirror_x[i]) : settings_mirror_x; assert(is_bool(mirror_x), "mirror_x must be a boolean");
         uniform_width = is_undef(settings_uniform_width) ? default_uniform_width : is_list(settings_uniform_width) ? (settings_uniform_width[i] == undef ? default_uniform_width : settings_uniform_width[i]) : settings_uniform_width; assert(is_bool(uniform_width) || is_list(uniform_width), "uniform_width must be a boolean or a list");
         flat_back = is_undef(settings_flat_back) ? default_flat_back : is_list(settings_flat_back) ? (settings_flat_back[i] == undef ? default_flat_back : settings_flat_back[i]) : settings_flat_back; assert(is_bool(flat_back), "flat_back must be a boolean");
-        flat_front = is_undef(settings_flat_front) ? default_flat_front : is_list(settings_flat_front) ? (settings_flat_front[i] == undef ? default_flat_front : settings_flat_front[i]) : settings_flat_front; assert(is_bool(flat_front), "flat_front must be a boolean");
+        flat_front = is_undef(settings_flat_front) ? default_flat_front : is_list(settings_flat_front) ? (settings_flat_front[i] == undef ? default_flat_front : settings_flat_front[i]) : settings_flat_front; assert(is_bool(flat_front) || is_list(flat_front), "flat_front must be a boolean or a list");
 
         // Can be a single vec3 or a list of vec3 - a bit messy but works
         translation = is_undef(settings_translation) ? [0, (mirror_x == false ? -1 : 1) * wall_thickness/2, 0] : len(settings_translation) == 3 && is_num(settings_translation[0]) && is_num(settings_translation[1]) && is_num(settings_translation[2]) ? settings_translation : settings_translation[i] == undef ? [0, (mirror_x == false ? -1 : 1) * wall_thickness/2, 0] : settings_translation[i];  assert(is_list(translation) && (len(translation) == 3), "translation must be a vec3 or a list of vec3");
@@ -156,7 +156,7 @@ module cable_holder(){
             union(){
                 translate(translation + additional_translation){
                     cable_holder_single(cables_dia=cables_dia, height=height, wall_thickness=wall_thickness, cable_entry_percentage=cable_entry_percentage, center=center, mirror_x=mirror_x,
-                     uniform_width=uniform_width, flat_back=flat_back, flat_front=flat_front,
+                     uniform_width=uniform_width, flat_back=flat_back, flat_fronts=flat_front,
                      length_override=length_override, cable_entry_percentage_override=cable_entry_percentage_override,
                      cable_spacing=cable_spacing, cable_spacing_length=cable_spacing_length, webbing_wall_thickness=webbing_wall_thickness);
                 }
@@ -164,7 +164,7 @@ module cable_holder(){
         } else {
             translate(translation + additional_translation){
                 cable_holder_single(cables_dia=cables_dia, height=height, wall_thickness=wall_thickness, cable_entry_percentage=cable_entry_percentage, center=center, mirror_x=mirror_x,
-                uniform_width=uniform_width, flat_back=flat_back, flat_front=flat_front,
+                uniform_width=uniform_width, flat_back=flat_back, flat_fronts=flat_front,
                 length_override=length_override, cable_entry_percentage_override=cable_entry_percentage_override,
                 cable_spacing=cable_spacing, cable_spacing_length=cable_spacing_length, webbing_wall_thickness=webbing_wall_thickness);
             }
@@ -174,7 +174,7 @@ module cable_holder(){
 
 // uniform_width - if you mix diameters the ends won't lign up properly -> use this to set the ends to width of the biggest dia
 module cable_holder_single(cables_dia=[6,7,7,6], height=8, wall_thickness=1.6, cable_entry_percentage=0.80, center=true, mirror_x=false,
- uniform_width=true, flat_back = true, flat_front = true,
+ uniform_width=true, flat_back = true, flat_fronts = true,
  // Advanced features:
  length_override = undef,
  cable_entry_percentage_override = undef,
@@ -245,6 +245,7 @@ for(i=[0:num_cables-1]){
     dia = cables_dia[i];
     width_half = wall_thickness + dia/2;
     opening_width = is_undef(cable_entry_perc_override) ? cable_entry_percentage * dia : cable_entry_perc_override * dia;
+    flat_front = is_list(flat_fronts) ? (is_undef(flat_fronts[i]) ? default_flat_front : flat_fronts[i]) : (is_undef(flat_fronts) ? default_flat_front : flat_fronts); assert(is_bool(flat_front), "flat_front must be a boolean");
 
     center_y = dia/2 + wall_thickness;
     length = lengths[i];
