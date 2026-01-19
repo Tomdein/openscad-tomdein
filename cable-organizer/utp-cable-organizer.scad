@@ -110,7 +110,47 @@ cable_holder();
 
 // Create cable_holder_single instances based on settings
 // module cable_holder(settings=cable_holder_settings){
-module cable_holder(){
+module cable_holder(
+    settings_cables_dia_param,
+    settings_height_param = undef,
+    settings_wall_thickness_param = undef,
+    settings_cable_entry_percentage_param = undef,
+    settings_center_param = undef,
+    settings_mirror_x_param = undef,
+    settings_uniform_width_param = undef,
+    settings_flat_back_param = undef,
+    settings_flat_front_param = undef,
+    settings_translation_param = undef,
+    settings_additional_translation_param = undef,
+    settings_union_param = undef,
+    // Advanced features:
+    settings_length_override_param = undef,
+    settings_cable_entry_percentage_override_param = undef,
+    settings_cable_spacing_param = undef,
+    settings_cable_spacing_length_param = undef,
+    settings_webbing_wall_thickness_param = undef
+){
+    // Use either passed parameters or global settings
+    settings_cables_dia = is_undef(settings_cables_dia_param) ? settings_cables_dia : settings_cables_dia_param; if(is_undef(settings_cables_dia_param)){echo("Using global settings_cables_dia");}
+    settings_height = is_undef(settings_height_param) ? is_undef(settings_height) ? undef : settings_height : settings_height_param; if(is_undef(settings_height_param)){echo("Using global or default settings_height");}
+    settings_wall_thickness = is_undef(settings_wall_thickness_param) ? is_undef(settings_wall_thickness) ? undef : settings_wall_thickness : settings_wall_thickness_param; if(is_undef(settings_wall_thickness_param)){echo("Using global or default settings_wall_thickness");}
+    settings_cable_entry_percentage = is_undef(settings_cable_entry_percentage_param) ? is_undef(settings_cable_entry_percentage) ? undef : settings_cable_entry_percentage : settings_cable_entry_percentage_param; if(is_undef(settings_cable_entry_percentage_param)){echo("Using global or default settings_cable_entry_percentage");}
+    settings_center = is_undef(settings_center_param) ? is_undef(settings_center) ? undef : settings_center : settings_center_param; if(is_undef(settings_center_param)){echo("Using global or default settings_center");}
+    settings_mirror_x = is_undef(settings_mirror_x_param) ? is_undef(settings_mirror_x) ? undef : settings_mirror_x : settings_mirror_x_param; if(is_undef(settings_mirror_x_param)){echo("Using global or default settings_mirror_x");}
+    settings_uniform_width = is_undef(settings_uniform_width_param) ? is_undef(settings_uniform_width) ? undef : settings_uniform_width : settings_uniform_width_param; if(is_undef(settings_uniform_width_param)){echo("Using global or default settings_uniform_width");}
+    settings_flat_back = is_undef(settings_flat_back_param) ? is_undef(settings_flat_back) ? undef : settings_flat_back : settings_flat_back_param; if(is_undef(settings_flat_back_param)){echo("Using global or default settings_flat_back");}
+    settings_flat_front = is_undef(settings_flat_front_param) ? is_undef(settings_flat_front) ? undef : settings_flat_front : settings_flat_front_param; if(is_undef(settings_flat_front_param)){echo("Using global or default settings_flat_front");}
+    settings_translation = is_undef(settings_translation_param) ? is_undef(settings_translation) ? undef : settings_translation : settings_translation_param; if(is_undef(settings_translation_param)){echo("Using global or default settings_translation");}
+    settings_additional_translation = is_undef(settings_additional_translation_param) ? is_undef(settings_additional_translation) ? undef : settings_additional_translation : settings_additional_translation_param; if(is_undef(settings_additional_translation_param)){echo("Using global or default settings_additional_translation");}
+    settings_union = is_undef(settings_union_param) ? is_undef(settings_union) ? undef : settings_union : settings_union_param; if(is_undef(settings_union_param)){echo("Using global or default settings_union");}
+    // Advanced features:
+    settings_length_override = is_undef(settings_length_override_param) ? is_undef(settings_length_override) ? undef : settings_length_override : settings_length_override_param; if(is_undef(settings_length_override_param)){echo("Using global or default settings_length_override");}
+    settings_cable_entry_percentage_override = is_undef(settings_cable_entry_percentage_override_param) ? is_undef(settings_cable_entry_percentage_override) ? undef : settings_cable_entry_percentage_override : settings_cable_entry_percentage_override_param; if(is_undef(settings_cable_entry_percentage_override_param)){echo("Using global or default settings_cable_entry_percentage_override");}
+    settings_cable_spacing = is_undef(settings_cable_spacing_param) ? is_undef(settings_cable_spacing) ? undef : settings_cable_spacing : settings_cable_spacing_param; if(is_undef(settings_cable_spacing_param)){echo("Using global or default settings_cable_spacing");}
+    settings_cable_spacing_length = is_undef(settings_cable_spacing_length_param) ? is_undef(settings_cable_spacing_length) ? undef : settings_cable_spacing_length : settings_cable_spacing_length_param; if(is_undef(settings_cable_spacing_length_param)){echo("Using global or default settings_cable_spacing_length");}
+    settings_webbing_wall_thickness = is_undef(settings_webbing_wall_thickness_param) ? is_undef(settings_webbing_wall_thickness) ? undef : settings_webbing_wall_thickness : settings_webbing_wall_thickness_param; if(is_undef(settings_webbing_wall_thickness_param)){echo("Using global or default settings_webbing_wall_thickness");}
+
+    // Create cable holders
     echo("Generating cable holders...");
     assert(is_list(settings_cables_dia), "cables_dia must be a list of lists");
     assert(is_undef(settings_translation) || is_list(settings_translation), "translation must be a vec3 or list of vec3");
