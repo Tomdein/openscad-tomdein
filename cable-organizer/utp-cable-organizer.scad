@@ -162,7 +162,7 @@ module cable_holder(
     // Loop through each cable holder settings and extract parameters from single value or list value or set default if undef
     // => Check if list/single value, check if undef in list, set default if undef
     for (i=[0:num_holders-1]){
-        echo(str("Generating cable holder ", i + 1, " of ", num_holders));
+        echo(str("Generating cable holder ", cables_dia, ": ", i + 1, " of ", num_holders));
 
         // Or allow single value without list??: cables_dia = is_list(settings_cables_dia[i]) ? settings_cables_dia[i] : [settings_cables_dia[i]];
         cables_dia = settings_cables_dia[i]; assert(is_list(cables_dia), "cables_dia entries must be a list for each cable holder");
