@@ -12,7 +12,7 @@ I downloaded a [nice models](https://www.printables.com/model/1111926-cable-orga
  - Have them all share the same width or not
 
 ## Advanced features
- - Custom lenghts for individual cable positions
+ - Custom lenghts for individual cable positions (**overrides `uniform_width`**)
  - Custom hole sizes for individual cable positions
  - Create spacings between cable positions:
    - No wall
@@ -26,7 +26,7 @@ I downloaded a [nice models](https://www.printables.com/model/1111926-cable-orga
  - `default_entry_percentage`: `0.8` (80% of cable dia is cut out)
  - `center`: `true`
  - `mirror_x`: `false`
- - `uniform_width`: `true`
+ - `uniform_width`: `true` (needs `flat_front=true` for given cable position)
  - `flat_back`: `true`
  - `flat_front`: `true`
  - `union`: `true` (nice for second cable organizer with mirror_x = true)
