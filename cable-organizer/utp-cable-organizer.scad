@@ -102,7 +102,10 @@ default_flat_front = true;
 // default_translation = [0, wall_thickness/2, 0]; for mirror_x=true
 default_union = true;
 
-cable_holder();
+create_cable_holder_automatically = true;
+if(create_cable_holder_automatically == true){
+    cable_holder();
+}
 
 // Needs development version
 // cable_holder_settings = object(cables_dia=cables_dia, height=height, wall_thickness=wall_thickness, cable_entry_percentage=cable_entry_percentage, center=center, mirror_x=mirror_x,
