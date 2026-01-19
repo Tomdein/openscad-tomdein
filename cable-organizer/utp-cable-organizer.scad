@@ -364,7 +364,9 @@ for(i=[0:num_cables-1]){
 
                 translate([cum_width[i] + width_half*2 - wall_thickness, 0, 0]){
                     difference(){
+                        // Spacer Body
                         cube([spacer_width + wall_thickness, spacer_length, height], center=false);
+
                         // Front Chamfer
                         if(spacer_length > lengths[i]){
                             translate([0, spacer_length - wall_thickness, -height]){
