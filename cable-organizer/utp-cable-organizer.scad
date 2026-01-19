@@ -15,23 +15,29 @@ function is_undef_or_numlist(v, i = 0) = is_list(v) && (i < len(v) ? (is_num(v[i
 // If you set some parameters as lists and leave some entries as undef those will be replaced by the default values.
 //
 // ======================================================= Fill this in =======================================================
-settings_cables_dia = [[5.5,5.5,5.5,5.5],[4.5,4.5,4.5,4.5,4.5,1.5,1.5,1.5,1.5]]; // or just a single list: cables_dia = [5,4,4,5];
-settings_height = 8;
-settings_wall_thickness = 1.2;
-settings_cable_entry_percentage = 0.80;
-settings_center = true;
-settings_mirror_x = [false, true];
-settings_uniform_width = true;
-settings_flat_back = true;
-settings_flat_front = true;
+// <=====
+settings_cables_dia = [[4.5,4.5,4.5,4.5,4.5,1.5,1.5,1.5,1.5]]; // or just a single list: cables_dia = [5,4,4,5];
+// settings_height = 8;
+// settings_wall_thickness = 1.2;
+// settings_cable_entry_percentage = 0.80;
+// settings_center = true;
+// settings_mirror_x = [false, true];
+// settings_uniform_width = true;
+// settings_flat_back = true;
+// settings_flat_front = true;
+// <=====
 
 // settings_translation = [0, 0, 0]; // A vec3 or a list of vec3 for every cable holder
 // To offset last N cable holders out as you would 'glue' them to the side do the following:
 // for dia = [4.5,4.5,4.5,4.5,4.5,2,2,2,2] where we want the last 4 2mm cables to be offset:
 // set the x translation to the [(2+2+2+2) + (spacer1, spacer2, spacer3) + wall_thickness]/2 - using any spacers if you used them
 // that is: (N*dia + sum_of_N-1_spacers + wall_thickness)/2
-settings_additional_translation = [undef, [(4*1.5 + 3*(2+settings_wall_thickness) + settings_wall_thickness)/2, 0, 0]]; // A vec3 or a list of vec3 for every cable holder
-settings_union = true;
+
+// <=====
+// settings_additional_translation = [undef, [(4*1.5 + 3*(2+settings_wall_thickness) + settings_wall_thickness)/2, 0, 0]]; // A vec3 or a list of vec3 for every cable holder
+// settings_union = true;
+// <=====
+
 // ==================================================== Advanced features =====================================================
 // If you want to set a custom length for every cable holder
 //  - a single value
@@ -41,7 +47,10 @@ settings_union = true;
 // Please, don't negative values
 // Normally the value is: [max_]dia + 2*wall_thickness. Lower values will break the model so they are capped to that minimum.
 // Example: settings_length_override = [10, [8, undef]];
-settings_length_override = undef;
+
+// <=====
+// settings_length_override = undef;
+// <=====
 
 // If you want to set a custom cable_entry_percentage for every cable holder
 //  - a single value
@@ -49,7 +58,10 @@ settings_length_override = undef;
 //  - a list of lists for every cable in every cable holder
 // A 0 or negative number is treated as undef - default_cable_entry_percentage will be used
 // Example: settings_length_override = [undef, [0.50, undef]];
-settings_cable_entry_percentage_override = undef;
+
+// <=====
+// settings_cable_entry_percentage_override = undef;
+// <=====
 
 // If you want to add spacings between cables
 //  - a single value
@@ -58,14 +70,22 @@ settings_cable_entry_percentage_override = undef;
 // A 0 or negative number is treated as undef - no effect here
 // One wall_thickness is overlapped so you might want to add +wall_thickness
 // Example: settings_length_override = [undef, [0.50, undef]];
-settings_cable_spacing = [undef, [undef,undef,undef,undef,undef,2,2,2]];
+// settings_cable_spacing = [undef, [undef,undef,undef,undef,undef,2,2,2]];
 // The same as above but in either a undef/0 or length in mm or 'w' as wall (fill all) or 'b' only back (fill just the back part) or 'c' that connects the middles of the cables
-settings_cable_spacing_length = "w";
+
+// <=====
+// settings_cable_spacing_length = "w";
+// <=====
+
 // If undef uses wall_thickness.
 // Only used for "c" option above.
 // As usual can be a single value or a list or list of values for every cable holder.
 // Best used with flat_back=false
-settings_webbing_wall_thickness = 1.5 * settings_wall_thickness;
+
+// <=====
+// settings_webbing_wall_thickness = 1.5 * settings_wall_thickness;
+// <=====
+
 // ================================================== CABLE HOLDERS SETTINGS ==================================================
 
 // Every parameter is in mm
@@ -103,14 +123,14 @@ module cable_holder(){
 
         // Or allow single value without list??: cables_dia = is_list(settings_cables_dia[i]) ? settings_cables_dia[i] : [settings_cables_dia[i]];
         cables_dia = settings_cables_dia[i]; assert(is_list(cables_dia), "cables_dia entries must be a list for each cable holder");
-        height = is_list(settings_height) ? (settings_height[i] == undef ? default_height : settings_height[i]) : settings_height; assert(is_num(height), "height must be a number");
-        wall_thickness = is_list(settings_wall_thickness) ? (settings_wall_thickness[i] == undef ? default_wall_thickness : settings_wall_thickness[i]) : settings_wall_thickness; assert(is_num(wall_thickness), "wall_thickness must be a number");
-        cable_entry_percentage = is_list(settings_cable_entry_percentage) ? (settings_cable_entry_percentage[i] == undef ? default_entry_percentage : settings_cable_entry_percentage[i]) : settings_cable_entry_percentage; assert(is_num(cable_entry_percentage), "cable_entry_percentage must be a number");
-        center = is_list(settings_center) ? (settings_center[i] == undef ? default_center : settings_center[i]) : settings_center; assert(is_bool(center), "center must be a boolean");
-        mirror_x = is_list(settings_mirror_x) ? (settings_mirror_x[i] == undef ? default_mirror_x : settings_mirror_x[i]) : settings_mirror_x; assert(is_bool(mirror_x), "mirror_x must be a boolean");
-        uniform_width = is_list(settings_uniform_width) ? (settings_uniform_width[i] == undef ? default_uniform_width : settings_uniform_width[i]) : settings_uniform_width; assert(is_bool(uniform_width), "uniform_width must be a boolean");
-        flat_back = is_list(settings_flat_back) ? (settings_flat_back[i] == undef ? default_flat_back : settings_flat_back[i]) : settings_flat_back; assert(is_bool(flat_back), "flat_back must be a boolean");
-        flat_front = is_list(settings_flat_front) ? (settings_flat_front[i] == undef ? default_flat_front : settings_flat_front[i]) : settings_flat_front; assert(is_bool(flat_front), "flat_front must be a boolean");
+        height = is_undef(settings_height) ? default_height : is_list(settings_height) ? (settings_height[i] == undef ? default_height : settings_height[i]) : settings_height; assert(is_num(height), "height must be a number");
+        wall_thickness = is_undef(settings_wall_thickness) ? default_wall_thickness : is_list(settings_wall_thickness) ? (settings_wall_thickness[i] == undef ? default_wall_thickness : settings_wall_thickness[i]) : settings_wall_thickness; assert(is_num(wall_thickness), "wall_thickness must be a number");
+        cable_entry_percentage = is_undef(settings_cable_entry_percentage) ? default_entry_percentage : is_list(settings_cable_entry_percentage) ? (settings_cable_entry_percentage[i] == undef ? default_entry_percentage : settings_cable_entry_percentage[i]) : settings_cable_entry_percentage; assert(is_num(cable_entry_percentage), "cable_entry_percentage must be a number");
+        center = is_undef(settings_center) ? default_center : is_list(settings_center) ? (settings_center[i] == undef ? default_center : settings_center[i]) : settings_center; assert(is_bool(center), "center must be a boolean");
+        mirror_x = is_undef(settings_mirror_x) ? default_mirror_x : is_list(settings_mirror_x) ? (settings_mirror_x[i] == undef ? default_mirror_x : settings_mirror_x[i]) : settings_mirror_x; assert(is_bool(mirror_x), "mirror_x must be a boolean");
+        uniform_width = is_undef(settings_uniform_width) ? default_uniform_width : is_list(settings_uniform_width) ? (settings_uniform_width[i] == undef ? default_uniform_width : settings_uniform_width[i]) : settings_uniform_width; assert(is_bool(uniform_width), "uniform_width must be a boolean");
+        flat_back = is_undef(settings_flat_back) ? default_flat_back : is_list(settings_flat_back) ? (settings_flat_back[i] == undef ? default_flat_back : settings_flat_back[i]) : settings_flat_back; assert(is_bool(flat_back), "flat_back must be a boolean");
+        flat_front = is_undef(settings_flat_front) ? default_flat_front : is_list(settings_flat_front) ? (settings_flat_front[i] == undef ? default_flat_front : settings_flat_front[i]) : settings_flat_front; assert(is_bool(flat_front), "flat_front must be a boolean");
 
         // Can be a single vec3 or a list of vec3 - a bit messy but works
         translation = is_undef(settings_translation) ? [0, (mirror_x == false ? -1 : 1) * wall_thickness/2, 0] : len(settings_translation) == 3 && is_num(settings_translation[0]) && is_num(settings_translation[1]) && is_num(settings_translation[2]) ? settings_translation : settings_translation[i] == undef ? [0, (mirror_x == false ? -1 : 1) * wall_thickness/2, 0] : settings_translation[i];  assert(is_list(translation) && (len(translation) == 3), "translation must be a vec3 or a list of vec3");
@@ -119,18 +139,18 @@ module cable_holder(){
         additional_translation = is_undef(settings_additional_translation) ? [0, 0, 0] : len(settings_additional_translation) == 3 && is_num(settings_additional_translation[0]) && is_num(settings_additional_translation[1]) && is_num(settings_additional_translation[2]) ? settings_additional_translation : settings_additional_translation[i] == undef ? [0, 0, 0] : settings_additional_translation[i];  assert(is_list(translation) && (len(translation) == 3), "additional translation must be a vec3 or a list of vec3");
         assert(is_num(additional_translation[0]) && is_num(additional_translation[1]) && is_num(additional_translation[2]), "additional translation values must be numbers");
 
-        union_flag = is_list(settings_union) ? (settings_union[i] == undef ? default_union : settings_union[i]) : settings_union; assert(is_bool(union_flag), "union must be a boolean");
+        union_flag = is_undef(settings_union) ? default_union : is_list(settings_union) ? (settings_union[i] == undef ? default_union : settings_union[i]) : settings_union; assert(is_bool(union_flag), "union must be a boolean");
 
         // Advanced features
-        length_override = is_undef(settings_length_override) || is_num(settings_length_override)? settings_length_override : settings_length_override[i];
+        length_override = is_undef(settings_length_override) ? undef : is_num(settings_length_override)? settings_length_override : settings_length_override[i];
         assert(is_undef(length_override) || is_list(length_override) || is_num(length_override), "length_override must be undef/number, a list of undef/numbers or a list of lists of undef/numbers");
 
-        cable_entry_percentage_override = is_undef(settings_cable_entry_percentage_override) || is_num(settings_cable_entry_percentage_override)? settings_cable_entry_percentage_override : settings_cable_entry_percentage_override[i];
+        cable_entry_percentage_override = is_undef(settings_cable_entry_percentage_override) ? undef : is_num(settings_cable_entry_percentage_override)? settings_cable_entry_percentage_override : settings_cable_entry_percentage_override[i];
         assert(is_undef(cable_entry_percentage_override) || is_list(cable_entry_percentage_override) || is_num(cable_entry_percentage_override), "cable_entry_percentage_override must be undef/number, a list of undef/numbers or a list of lists of undef/numbers");
 
-        cable_spacing = is_undef(settings_cable_spacing) || is_num(settings_cable_spacing) ? settings_cable_spacing : settings_cable_spacing[i];
-        cable_spacing_length = is_undef(settings_cable_spacing_length) || is_num(settings_cable_spacing_length) || is_string(settings_cable_spacing_length) ? settings_cable_spacing_length : settings_cable_spacing_length[i];
-        webbing_wall_thickness = is_undef(settings_webbing_wall_thickness) || is_num(settings_webbing_wall_thickness) ? settings_webbing_wall_thickness : settings_webbing_wall_thickness[i];
+        cable_spacing = is_undef(settings_cable_spacing) ? undef : is_num(settings_cable_spacing) ? settings_cable_spacing : settings_cable_spacing[i];
+        cable_spacing_length = is_undef(settings_cable_spacing_length) ? undef : is_num(settings_cable_spacing_length) || is_string(settings_cable_spacing_length) ? settings_cable_spacing_length : settings_cable_spacing_length[i];
+        webbing_wall_thickness = is_undef(settings_webbing_wall_thickness) ? undef : is_num(settings_webbing_wall_thickness) ? settings_webbing_wall_thickness : settings_webbing_wall_thickness[i];
 
         if(union_flag == true) {
             union(){
