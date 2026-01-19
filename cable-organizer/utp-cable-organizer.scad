@@ -283,13 +283,18 @@ for(i=[0:num_cables-1]){
             // Cut Front Chamfer
             for(j=[-1:1]){
                 if(i + j >= 0 && i + j < num_cables) {
-                    translate([cum_width[i] + width_half + j*(dia + wall_thickness/2), length, height])
-                    {
-                        rotate(a=45, v=[0, 0, 1])
+                    // Avoid cutting if spacer is longer than cable holder length
+                    if((j != 1 || length > spacer_length) && (j != -1 || length > spacer_length_prev)){
+                    difference(){
+                        translate([cum_width[i] + width_half + j*(dia + wall_thickness/2), length, height])
                         {
-                            w = (dia) / sqrt(2);
-                            cube([w, w, height*3], center=true);
+                            rotate(a=45, v=[0, 0, 1])
+                            {
+                                w = (dia) / sqrt(2);
+                                cube([w, w, height*3], center=true);
+                            }
                         }
+                    }
                     }
                 }
             }
