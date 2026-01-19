@@ -123,7 +123,7 @@ module cable_holder(){
 
         // Or allow single value without list??: cables_dia = is_list(settings_cables_dia[i]) ? settings_cables_dia[i] : [settings_cables_dia[i]];
         cables_dia = settings_cables_dia[i]; assert(is_list(cables_dia), "cables_dia entries must be a list for each cable holder");
-        height = is_undef(settings_height) ? default_height : is_list(settings_height) ? (settings_height[i] == undef ? default_height : settings_height[i]) : settings_height; assert(is_num(height), "height must be a number");
+        height = is_undef(settings_height) ? default_height : is_list(settings_height) ? (settings_height[i] == undef ? default_height : settings_height[i]) : settings_height; assert(is_num(height) || is_list(height), "height must be a number or a list");
         wall_thickness = is_undef(settings_wall_thickness) ? default_wall_thickness : is_list(settings_wall_thickness) ? (settings_wall_thickness[i] == undef ? default_wall_thickness : settings_wall_thickness[i]) : settings_wall_thickness; assert(is_num(wall_thickness), "wall_thickness must be a number");
         cable_entry_percentage = is_undef(settings_cable_entry_percentage) ? default_entry_percentage : is_list(settings_cable_entry_percentage) ? (settings_cable_entry_percentage[i] == undef ? default_entry_percentage : settings_cable_entry_percentage[i]) : settings_cable_entry_percentage; assert(is_num(cable_entry_percentage), "cable_entry_percentage must be a number");
         center = is_undef(settings_center) ? default_center : is_list(settings_center) ? (settings_center[i] == undef ? default_center : settings_center[i]) : settings_center; assert(is_bool(center), "center must be a boolean");
@@ -155,7 +155,7 @@ module cable_holder(){
         if(union_flag == true) {
             union(){
                 translate(translation + additional_translation){
-                    cable_holder_single(cables_dia=cables_dia, height=height, wall_thickness=wall_thickness, cable_entry_percentage=cable_entry_percentage, center=center, mirror_x=mirror_x,
+                    cable_holder_single(cables_dia=cables_dia, heights=height, wall_thickness=wall_thickness, cable_entry_percentage=cable_entry_percentage, center=center, mirror_x=mirror_x,
                      uniform_width=uniform_width, flat_back=flat_back, flat_fronts=flat_front,
                      length_override=length_override, cable_entry_percentage_override=cable_entry_percentage_override,
                      cable_spacing=cable_spacing, cable_spacing_length=cable_spacing_length, webbing_wall_thickness=webbing_wall_thickness);
@@ -163,7 +163,7 @@ module cable_holder(){
             }
         } else {
             translate(translation + additional_translation){
-                cable_holder_single(cables_dia=cables_dia, height=height, wall_thickness=wall_thickness, cable_entry_percentage=cable_entry_percentage, center=center, mirror_x=mirror_x,
+                cable_holder_single(cables_dia=cables_dia, heights=height, wall_thickness=wall_thickness, cable_entry_percentage=cable_entry_percentage, center=center, mirror_x=mirror_x,
                 uniform_width=uniform_width, flat_back=flat_back, flat_fronts=flat_front,
                 length_override=length_override, cable_entry_percentage_override=cable_entry_percentage_override,
                 cable_spacing=cable_spacing, cable_spacing_length=cable_spacing_length, webbing_wall_thickness=webbing_wall_thickness);
@@ -173,7 +173,7 @@ module cable_holder(){
 }
 
 // uniform_width - if you mix diameters the ends won't lign up properly -> use this to set the ends to width of the biggest dia
-module cable_holder_single(cables_dia=[6,7,7,6], height=8, wall_thickness=1.6, cable_entry_percentage=0.80, center=true, mirror_x=false,
+module cable_holder_single(cables_dia=[6,7,7,6], heights=8, wall_thickness=1.6, cable_entry_percentage=0.80, center=true, mirror_x=false,
  uniform_width=true, flat_back = true, flat_fronts = true,
  // Advanced features:
  length_override = undef,
@@ -184,6 +184,13 @@ num_cables = len(cables_dia);
 max_dia = max(cables_dia);
 sum_cable = add(cables_dia);
 width = sum_cable + (num_cables+1) * wall_thickness;
+heights = [for(i=[0:num_cables-1])
+    (
+        is_list(heights) ? (is_undef(heights[i]) ? default_height : heights[i]) : heights
+    )
+];
+// height = is_list(heights) ? (is_undef(heights[i]) ? default_height : heights[i]) : heights; assert(is_num(height), "height must be a number");
+
 cable_spacing_values = [for(i=0; i < num_cables - 1; i=i+1)
     (
         is_undef(cable_spacing) || (is_num(cable_spacing) && cable_spacing <= 0) ? 0 :
@@ -243,6 +250,7 @@ for(i=[0:num_cables-1]){
     assert(is_undef(cable_entry_perc_override) || is_num(cable_entry_perc_override), "cable_entry_percentage_override entries must be undef or numbers for each cable");
 
     dia = cables_dia[i];
+    height = heights[i]; assert(is_num(height), "height must be a number");
     width_half = wall_thickness + dia/2;
     opening_width = is_undef(cable_entry_perc_override) ? cable_entry_percentage * dia : cable_entry_perc_override * dia;
     flat_front = is_list(flat_fronts) ? (is_undef(flat_fronts[i]) ? default_flat_front : flat_fronts[i]) : (is_undef(flat_fronts) ? default_flat_front : flat_fronts); assert(is_bool(flat_front), "flat_front must be a boolean");
@@ -353,6 +361,9 @@ for(i=[0:num_cables-1]){
 
         // Add Spacer between cables
         if(i < num_cables - 1 && spacer_width > 0){
+            // If heights differ use the lower one
+            height = heights[i] > heights[i+1] ? heights[i+1] : heights[i];
+
             // "c" option - connect the middles of the cables - a webbing
             if(cable_spacing_length_values[i] == "c"){
                 x_start = cum_width[i] + width_half*2 - wall_thickness;
