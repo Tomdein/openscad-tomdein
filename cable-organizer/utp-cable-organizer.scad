@@ -128,7 +128,7 @@ module cable_holder(){
         cable_entry_percentage = is_undef(settings_cable_entry_percentage) ? default_entry_percentage : is_list(settings_cable_entry_percentage) ? (settings_cable_entry_percentage[i] == undef ? default_entry_percentage : settings_cable_entry_percentage[i]) : settings_cable_entry_percentage; assert(is_num(cable_entry_percentage), "cable_entry_percentage must be a number");
         center = is_undef(settings_center) ? default_center : is_list(settings_center) ? (settings_center[i] == undef ? default_center : settings_center[i]) : settings_center; assert(is_bool(center), "center must be a boolean");
         mirror_x = is_undef(settings_mirror_x) ? default_mirror_x : is_list(settings_mirror_x) ? (settings_mirror_x[i] == undef ? default_mirror_x : settings_mirror_x[i]) : settings_mirror_x; assert(is_bool(mirror_x), "mirror_x must be a boolean");
-        uniform_width = is_undef(settings_uniform_width) ? default_uniform_width : is_list(settings_uniform_width) ? (settings_uniform_width[i] == undef ? default_uniform_width : settings_uniform_width[i]) : settings_uniform_width; assert(is_bool(uniform_width), "uniform_width must be a boolean");
+        uniform_width = is_undef(settings_uniform_width) ? default_uniform_width : is_list(settings_uniform_width) ? (settings_uniform_width[i] == undef ? default_uniform_width : settings_uniform_width[i]) : settings_uniform_width; assert(is_bool(uniform_width) || is_list(uniform_width), "uniform_width must be a boolean or a list");
         flat_back = is_undef(settings_flat_back) ? default_flat_back : is_list(settings_flat_back) ? (settings_flat_back[i] == undef ? default_flat_back : settings_flat_back[i]) : settings_flat_back; assert(is_bool(flat_back), "flat_back must be a boolean");
         flat_front = is_undef(settings_flat_front) ? default_flat_front : is_list(settings_flat_front) ? (settings_flat_front[i] == undef ? default_flat_front : settings_flat_front[i]) : settings_flat_front; assert(is_bool(flat_front), "flat_front must be a boolean");
 
@@ -231,7 +231,7 @@ max_length = max_dia + 2*wall_thickness;
 len_overrides = [for(i=[0:num_cables-1]) is_undef(length_override) || is_num(length_override) ? length_override : length_override[i]];
 for(i=[0:num_cables-1]){assert(is_undef(len_override) || is_num(len_override), "length_override entries must be undef or numbers for each cable");}
 lengths = [for(i=[0:num_cables-1])
-    max(is_undef(len_overrides[i]) || len_overrides[i] <= 0 ? (uniform_width == true ? max_length : 0) : len_overrides[i], cables_dia[i] + 2*wall_thickness)
+    max(is_undef(len_overrides[i]) || len_overrides[i] <= 0 ? (is_list(uniform_width) ? (uniform_width[i] == true ? max_length : 0) : (uniform_width == true ? max_length : 0)) : len_overrides[i], cables_dia[i] + 2*wall_thickness)
 ];
 spacer_widths = [for(i=[0:num_cables-2]) cable_spacing_values[i] == undef ? 0 : cable_spacing_values[i]];
 spacer_lengths = [for(i=[0:num_cables-2]) cable_spacing_length_values[i] == "c" ? 0 : cable_spacing_length_values[i] == "w" ? lengths[i] : cable_spacing_length_values[i] == "b" ? wall_thickness : cable_spacing_length_values[i]];
